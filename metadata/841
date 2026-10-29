@@ -1,0 +1,19 @@
+{
+  "name": "Maneki Neko Coin #841",
+  "description": "CoinEko \u2014 Maneki Neko Coin (MNC) on BNB Chain.",
+  "image": "ipfs://bafybeidktgjxvaqthoem7xs6b6ser6c5m6lh6g4najkppsk4gwnyhayd7y/uncommon.png",
+  "attributes": [
+    {
+      "trait_type": "Tier",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Collection",
+      "value": "CoinEko"
+    },
+    {
+      "trait_type": "Chain",
+      "value": "BNB Chain"
+    }
+  ]
+}
