@@ -36,7 +36,7 @@ Phase 1 (first 556): 0.0001 BNB (free + commission)<br>
 Phase 2 (remaining 555): 0.001 BNB<br>
 Contract address: <b>0xc0C15426Edc77128d928E1aaF44a5F885071BB9A</b><br>
 Chain: BNB Chain (56) — Mainnet LIVE. <a href='https://bscscan.com/address/0xc0C15426Edc77128d928E1aaF44a5F885071BB9A'>View on BscScan</a></p>
-<label>Quantity (max 2): <select id="mintQty"><option value="1">1</option><option value="2">2</option></select></label><br><button id="mintBtn" onclick="mintCoinEko()">Connect Wallet & Mint</button><p><small id="mintStatus">Contract live on BSC Mainnet. Connect your wallet to mint.</small></p>
+<label>Quantity (max 2): <select id="mintQty"><option value="1">1</option><option value="2">2</option></select></label><br><button id="mintBtn" onclick="mintCoinEko()">Connect Wallet & Mint</button><p><small id="mintStatus">Contract live on BSC Mainnet. Connect your wallet to mint.</small></p><p><b id="liveMint">Live Mint: memuat data dari BSC...</b></p>
 <p><small id="walletNote">Wallet: connect via MetaMask / Binance Wallet on BSC Mainnet (56). Binance Agentic Wallet is CONNECTED: 0x36F3D56eAD5D1D6C2434F94DeFcEF732C5C3CbD2.</small></p>
 </div>
 
@@ -75,7 +75,7 @@ function toggleLang(){cur=cur==='en'?'jp':'en';const d=cur==='en'?en:jp;for(cons
 
 <script>
 const COINEKO_CONTRACT = "0xc0C15426Edc77128d928E1aaF44a5F885071BB9A";
-const BSC_RPCS = ["https://bsc-dataseed1.bnbchain.org","https://bsc-dataseed.bnbchain.org","https://bsc.publicnode.com"];
+const BSC_RPCS = ["https://bsc-dataseed2.bnbchain.org","https://bsc-rpc.publicnode.com","https://bsc.publicnode.com","https://bsc-dataseed1.bnbchain.org","https://bsc-dataseed.bnbchain.org"];
 async function getCurrentPrice(){
   // Try wallet provider eth_call first (no CORS issue in in-app browsers), then public BSC RPC as fallback
   if(window.ethereum){
@@ -94,6 +94,38 @@ async function getCurrentPrice(){
   throw new Error("Gagal membaca harga dari BSC. Coba lagi.");
 }
 function toHexBigInt(v){ return "0x"+v.toString(16); }
+async function getTotalMinted(){
+  if(window.ethereum){
+    try{
+      const r=await window.ethereum.request({method:"eth_call",params:[{to:COINEKO_CONTRACT,data:"0xa2309ff8"},"latest"]});
+      if(r && r!=="0x"){ return BigInt(r); }
+    }catch(e){}
+  }
+  for(const rpc of BSC_RPCS){
+    try{
+      const res=await fetch(rpc,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",method:"eth_call",params:[{to:COINEKO_CONTRACT,data:"0xa2309ff8"},"latest"],id:1})});
+      const j=await res.json();
+      if(j && j.result){ return BigInt(j.result); }
+    }catch(e){}
+  }
+  throw new Error("Gagal membaca total mint dari BSC.");
+}
+async function updateLiveMint(){
+  const el=document.getElementById("liveMint");
+  if(!el){ return; }
+  try{
+    const minted=await getTotalMinted();
+    const price=await getCurrentPrice();
+    const total=1111n;
+    const remaining=total-minted;
+    const phase=minted<556n?"Fase 1 (556 pertama)":"Fase 2 (555 sisanya)";
+    const priceBnb=Number(price)/1e18;
+    el.textContent="Live Mint - Sudah mint: "+minted.toString()+" / 1.111 | Sisa: "+remaining.toString()+" | Total supply: 1.111 | Harga sekarang: "+priceBnb+" BNB ("+phase+")";
+  }catch(e){
+    el.textContent="Live Mint: gagal memuat data dari BSC. Refresh halaman untuk coba lagi.";
+  }
+}
+updateLiveMint();
 async function mintCoinEko(){
   const st=document.getElementById("mintStatus");
   try{
