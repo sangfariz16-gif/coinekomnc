@@ -84,7 +84,7 @@ Chain: BNB Chain (56) — Mainnet LIVE. <a href='https://bscscan.com/address/0xc
 const en={title:"CoinEko — Maneki Neko Coin (MNC)",subtitle:"A limited collection of 1,111 Maneki Neko coins on BNB Chain — crafted for Binance Agentic Wallet, with premium artwork by the creator, not generic AI.",mintTitle:"Mint",mintText:"Limited to 1,111 pieces • Max 2 per wallet<br>Phase 1 (first 556): 0.0001 BNB<br>Phase 2 (remaining 555): 0.001 BNB<br>Contract: <b>0xc0C15426Edc77128d928E1aaF44a5F885071BB9A</b> • BNB Chain (56) • <a href='https://bscscan.com/address/0xc0C15426Edc77128d928E1aaF44a5F885071BB9A'>View on BscScan</a>",mintBtn:"Connect Wallet & Mint",walletNote:"Connect with MetaMask or Binance Wallet on BNB Chain Mainnet (56). Binance Agentic Wallet: connected.",rarityTitle:"Rarity — Transparent",legendTitle:"Legendary — Truly Different",legendText:"A distinct gold design with red gems and a radiant glow — not a recolour. Only 12 numbered editions (#001/012–#012/012). An exclusive animated version is planned in the metadata, with the static gold artwork as the main image.",utilityTitle:"Real Utility",transparencyTitle:"Transparency",transparencyText:"Full rarity breakdown is published above. Contract: 0xc0C15426Edc77128d928E1aaF44a5F885071BB9A on BNB Chain Mainnet (verified: Maneki Neko Coin / MNC, owner 0x36F3D56eAD5D1D6C2434F94DeFcEF732C5C3CbD2). Metadata is live at https://coineko.fun/metadata/ (IDs 1–1111), with tier images on IPFS. Mint rules: phase pricing, max 2 per wallet, pause function, refund of overpayment, and owner withdrawal."};
 const jp={title:"CoinEko — 招き猫コイン (MNC)",subtitle:"BNBチェーン上の1,111点限定の招き猫コインコレクション。Binance Agentic Wallet専用。クリエイターのプレミアムアートワークを使用しています。",mintTitle:"ミント",mintText:"1,111点限定 • ウォレットあたり最大2点<br>フェーズ1（最初の556点）: 0.0001 BNB<br>フェーズ2（残り555点）: 0.001 BNB<br>コントラクト: <b>0xc0C15426Edc77128d928E1aaF44a5F885071BB9A</b> • BNBチェーン (56) • <a href='https://bscscan.com/address/0xc0C15426Edc77128d928E1aaF44a5F885071BB9A'>BscScanで確認</a>",mintBtn:"ウォレット接続 & ミント",walletNote:"ウォレット: BSCメインネット (56) のMetaMask / Binance Walletで接続してください。Binance Agentic Walletは接続済みです。",rarityTitle:"レアリティ — 透明性",legendTitle:"レジェンダリー — 本当に特別",legendText:"単なる色違いではありません。ゴールドの特別デザイン、赤い宝石、輝き。番号付き12エディションのみ。メタデータのanimation_urlで限定アニメーション版も予定しています。",utilityTitle:"実際のユーティリティ",transparencyTitle:"透明性",transparencyText:"レアリティの詳細は上記をご覧ください。コントラクトアドレス: 0xc0C15426Edc77128d928E1aaF44a5F885071BB9A (BSCメインネット)。メタデータ: https://coineko.fun/metadata/ で公開中。"};
 let cur='en';
-function toggleLang(){cur=cur==='en'?'jp':'en';const d=cur==='en'?en:jp;for(const k in d){const el=document.getElementById(k);if(el)el.innerHTML=d[k];}document.documentElement.lang=cur==='en'?'en':'ja';}
+function toggleLang(){cur=cur==='en'?'jp':'en';const d=cur==='en'?en:jp;for(const k in d){const el=document.getElementById(k);if(el)el.innerHTML=d[k];}document.documentElement.lang=cur==='en'?'en':'ja';if(typeof updateLiveMint==='function'){updateLiveMint();}}
 </script>
 </div>
 
@@ -128,16 +128,22 @@ async function getTotalMinted(){
 async function updateLiveMint(){
   const el=document.getElementById("liveMint");
   if(!el){ return; }
+  const lang=(typeof cur!=="undefined")?cur:"en";
   try{
     const minted=await getTotalMinted();
     const price=await getCurrentPrice();
     const total=1111n;
     const remaining=total-minted;
-    const phase=minted<556n?"Fase 1 (556 pertama)":"Fase 2 (555 sisanya)";
     const priceBnb=Number(price)/1e18;
-    el.textContent="Live Mint - Sudah mint: "+minted.toString()+" / 1.111 | Sisa: "+remaining.toString()+" | Total supply: 1.111 | Harga sekarang: "+priceBnb+" BNB ("+phase+")";
+    if(lang==="jp"){
+      const phase=minted<556n?"フェーズ1（最初の556点）":"フェーズ2（残り555点）";
+      el.textContent="ライブミント - ミント済み: "+minted.toString()+" / 1,111 | 残り: "+remaining.toString()+" | 総供給量: 1,111 | 現在価格: "+priceBnb+" BNB（"+phase+"）";
+    }else{
+      const phase=minted<556n?"Phase 1, first 556":"Phase 2, remaining 555";
+      el.textContent="Live Mint - Minted: "+minted.toString()+" / 1,111 | Remaining: "+remaining.toString()+" | Total supply: 1,111 | Current price: "+priceBnb+" BNB ("+phase+")";
+    }
   }catch(e){
-    el.textContent="Live Mint: gagal memuat data dari BSC. Refresh halaman untuk coba lagi.";
+    el.textContent=(lang==="jp")?"ライブミント: BSCからデータを取得できませんでした。ページを更新してもう一度お試しください。":"Live Mint: failed to load data from BSC. Refresh the page to try again.";
   }
 }
 updateLiveMint();
